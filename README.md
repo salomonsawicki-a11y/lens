@@ -1,12 +1,9 @@
-# lens
-Lens-
 # Lens — AI Reading Companion
 
 Highlight any sentence anywhere on the web and get a plain-English
 explanation — grounded in what you're actually reading. Lens works on
 news, blogs, documentation, Wikipedia, journal articles, PDFs, books in
-the browser, and pretty much anything else with text. (Google Docs uses
-a keyboard shortcut — see below.)
+the browser, and pretty much anything else with text.
 
 ## How it works
 
@@ -36,13 +33,6 @@ Lens ships its own PDF viewer so highlight-to-explain works in PDFs the
 same way it does on a regular webpage. PDF links open automatically in
 the Lens viewer. For local `file://` PDFs, enable *Allow access to file
 URLs* at `chrome://extensions` → Lens → Details.
-
-## Google Docs / Sheets / Slides
-
-Google renders text in a canvas, so the floating Explain button can't
-appear over Docs content. Instead: highlight text, press **⌘E** (Mac)
-or **Ctrl+E** (Windows/Linux). Each use copies the highlighted text to
-your clipboard (this is how Lens reads it out of the canvas).
 
 ## Privacy
 
