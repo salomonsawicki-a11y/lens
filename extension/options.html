@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Lens — Settings</title>
+<style>
+  :root {
+    --accent: #6b4ee6;
+    --ink: #1a1814;
+    --ink-soft: #5a564e;
+    --ink-faint: #8a8378;
+    --bg: #faf7f2;
+    --card: #ffffff;
+    --rule: rgba(0,0,0,.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(ellipse at 20% 10%, #efe9dd 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 90%, #f0e6d4 0%, transparent 55%),
+      var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+    line-height: 1.55;
+    min-height: 100vh;
+    padding: 56px 24px 80px;
+  }
+  .wrap { max-width: 640px; margin: 0 auto; }
+  .header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 32px;
+  }
+  .logo {
+    width: 44px; height: 44px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #6b4ee6, #9b6dff);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 20px rgba(107,78,230,.3);
+  }
+  h1 { font-size: 24px; margin: 0; font-weight: 600; letter-spacing: -0.01em; }
+  .header-sub { color: var(--ink-soft); font-size: 13px; }
+  .card {
+    background: var(--card);
+    border: 0.5px solid var(--rule);
+    border-radius: 14px;
+    padding: 22px 24px;
+    box-shadow: 0 1px 0 rgba(255,255,255,.6) inset, 0 4px 12px rgba(0,0,0,.04);
+    margin-bottom: 18px;
+  }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-soft);
+    margin: 0 0 14px;
+  }
+  label { display: block; margin-bottom: 14px; }
+  label:last-child { margin-bottom: 0; }
+  .lbl {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--ink);
+  }
+  .hint {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-top: 6px;
+    line-height: 1.5;
+  }
+  .hint a { color: var(--accent); text-decoration: none; font-weight: 500; }
+  .hint a:hover { text-decoration: underline; }
+  input[type="text"], input[type="password"], select {
+    width: 100%;
+    height: 38px;
+    padding: 0 12px;
+    border: 0.5px solid rgba(0,0,0,.15);
+    border-radius: 8px;
+    background: #fff;
+    font: inherit;
+    font-size: 13px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.12s, box-shadow 0.12s;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  select { font-family: inherit; }
+  input:focus, select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(107,78,230,.16);
+  }
+  .row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .row > input { flex: 1; }
+  .row .show-btn {
+    height: 38px;
+    padding: 0 12px;
+    border: 0.5px solid rgba(0,0,0,.12);
+    background: #fff;
+    border-radius: 8px;
+    font-size: 12px;
+    color: var(--ink-soft);
+    cursor: pointer;
+  }
+  .row .show-btn:hover { background: rgba(0,0,0,.04); }
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 4px;
+    align-items: center;
+  }
+  .btn {
+    height: 36px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent);
+    color: #fff;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+  }
+  .btn:hover { background: #5a3fd9; }
+  .btn.secondary {
+    background: rgba(0,0,0,.06);
+    color: var(--ink);
+  }
+  .btn.secondary:hover { background: rgba(0,0,0,.1); }
+  .status {
+    font-size: 12px;
+    color: var(--ink-soft);
+    margin-left: 8px;
+  }
+  .status.ok { color: #1f8a5b; }
+  .status.err { color: #b91c1c; }
+  .slider-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: center;
+  }
+  input[type="range"] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 4px;
+    border-radius: 999px;
+    background: rgba(0,0,0,.12);
+    outline: none;
+  }
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: var(--accent);
+    cursor: pointer;
+  }
+  .val {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    min-width: 40px;
+    text-align: right;
+  }
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 0;
+  }
+  .toggle {
+    position: relative;
+    width: 36px; height: 20px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(0,0,0,.18);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .toggle[data-on="1"] { background: var(--accent); }
+  .toggle i {
+    position: absolute;
+    top: 2px; left: 2px;
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2);
+    transition: transform 0.15s;
+  }
+  .toggle[data-on="1"] i { transform: translateX(16px); }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 8px;
+  }
+  .stat {
+    padding: 14px;
+    background: rgba(107,78,230,.06);
+    border-radius: 10px;
+    text-align: center;
+  }
+  .stat-n {
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--accent);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  .stat-l {
+    font-size: 11px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+  .danger { color: #b91c1c; }
+  .danger:hover { background: rgba(185,28,28,.08); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">
+      <svg width="22" height="22" viewBox="0 0 16 16" fill="none">
+        <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.6"/>
+        <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+        <circle cx="7" cy="7" r="1.8" fill="currentColor"/>
+      </svg>
+    </div>
+    <div>
+      <h1>Lens settings</h1>
+      <div class="header-sub">Highlight text on any page or PDF to get an AI explanation.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Explanation engine</div>
+    <label>
+      <span>Engine</span>
+      <select id="engine">
+        <option value="auto">Auto — built-in AI, no setup needed (recommended)</option>
+        <option value="builtin">Built-in AI only — on-device, free, no key needed</option>
+        <option value="cloud">Claude API — highest quality, needs your Anthropic key</option>
+      </select>
+      <div class="hint" id="engineStatus" style="margin-top:6px;font-size:12px;color:#777"></div>
+      <button class="btn secondary" id="downloadBtn" style="display:none;margin-top:6px">Download built-in model</button>
+    </label>
+
+    <label>
+      <span class="lbl">Anthropic API key <span style="font-weight:400;color:#999">(optional — upgrades Auto mode to Claude)</span></span>
+      <div class="row">
+        <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off" spellcheck="false" />
+        <button class="show-btn" id="showBtn" type="button">Show</button>
+      </div>
+      <div class="hint">
+        Get one at <a href="https://console.anthropic.com/settings/keys" target="_blank" rel="noreferrer">console.anthropic.com/settings/keys</a>. Stored locally in your browser — never leaves your machine except when calling the API.
+      </div>
+    </label>
+    <label>
+      <span class="lbl">Model</span>
+      <select id="model">
+        <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 — fast, cheap (recommended)</option>
+        <option value="claude-sonnet-4-6">Claude Sonnet 4.6 — slower, more thorough</option>
+        <option value="claude-opus-4-7">Claude Opus 4.7 — most capable</option>
+      </select>
+    </label>
+    <div class="btn-row">
+      <button class="btn" id="saveBtn">Save</button>
+      <button class="btn secondary" id="testBtn">Test connection</button>
+      <span class="status" id="status"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Appearance</div>
+    <label>
+      <span class="lbl">Popup tint</span>
+      <select id="tint">
+        <option value="violet">Violet (default)</option>
+        <option value="slate">Slate</option>
+        <option value="amber">Amber</option>
+      </select>
+    </label>
+    <div class="toggle-row">
+      <div>
+        <div class="lbl" style="margin-bottom:0">Dark popup</div>
+        <div class="hint" style="margin-top:2px">Glass with dark backdrop, good for reading at night.</div>
+      </div>
+      <button class="toggle" id="dark" data-on="0"><i></i></button>
+    </div>
+    <label style="margin-top:14px">
+      <span class="lbl">Popup width</span>
+      <div class="slider-row">
+        <input type="range" id="popupWidth" min="280" max="460" step="10" />
+        <span class="val" id="popupWidthVal">360px</span>
+      </div>
+    </label>
+    <label>
+      <span class="lbl">Body text size</span>
+      <div class="slider-row">
+        <input type="range" id="fontSize" min="11" max="16" step="1" />
+        <span class="val" id="fontSizeVal">13px</span>
+      </div>
+    </label>
+    <label>
+      <span class="lbl">Stream speed</span>
+      <div class="slider-row">
+        <input type="range" id="streamSpeed" min="1" max="20" step="1" />
+        <span class="val" id="streamSpeedVal">3</span>
+      </div>
+    </label>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Data</div>
+    <div class="stats">
+      <div class="stat"><div class="stat-n" id="historyCount">0</div><div class="stat-l">history</div></div>
+      <div class="stat"><div class="stat-n" id="savedCount">0</div><div class="stat-l">saved</div></div>
+    </div>
+    <div class="btn-row" style="margin-top:14px">
+      <button class="btn secondary" id="clearHistory">Clear history</button>
+      <button class="btn secondary" id="clearSaved">Clear saved</button>
+    </div>
+  </div>
+</div>
+<script src="options.js"></script>
+</body>
+</html>

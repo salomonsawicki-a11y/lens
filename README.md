@@ -8,13 +8,17 @@ the browser, and pretty much anything else with text.
 ## How it works
 
 1. Install Lens (Chrome).
-2. Open the extension's **Settings** and paste your **Anthropic API key**.
-   Get one at https://console.anthropic.com.
-3. Read anything. Highlight a sentence.
-4. Click the small magnifying-glass **Explain** button — or press
+2. Read anything. Highlight a sentence.
+3. Click the small magnifying-glass **Explain** button — or press
    ⌘E / Ctrl+E, or right-click → "Explain with Lens."
-5. The popup explains it — using the surrounding paragraph or page as
+4. The popup explains it — using the surrounding paragraph or page as
    context, so the explanation fits what you're reading.
+
+**No setup needed on supported devices** — Lens uses Chrome's built-in
+on-device AI by default: free, private, no account, no API key. For
+higher-quality explanations you can optionally paste an **Anthropic API
+key** (from https://console.anthropic.com) in the extension's Settings;
+Lens then uses Claude instead.
 
 ### Tabs in the popup
 
@@ -36,9 +40,11 @@ URLs* at `chrome://extensions` → Lens → Details.
 
 ## Privacy
 
-Lens runs entirely in your browser. The only data sent anywhere is the
-text you choose to explain — sent directly to Anthropic's API using your
-own key. See `PRIVACY.md`.
+In built-in mode (the default), the text you highlight is processed on
+your own device and never leaves your machine. With an API key saved,
+the text you choose to explain is sent directly to Anthropic's API using
+your own key. Either way there's no Lens server, no analytics, no
+tracking. See `PRIVACY.md`.
 
 ## License
 

@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+
+<meta charset="UTF-8" />
+<title>Lens</title>
+<style>
+  :root {
+    --accent: #6b4ee6;
+    --ink: #1a1814;
+    --ink-soft: #5a564e;
+    --ink-faint: #8a8378;
+    --bg: #faf7f2;
+    --rule: rgba(0,0,0,.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    width: 340px;
+    max-height: 520px;
+    overflow-y: auto;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+  .hd {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-bottom: 0.5px solid var(--rule);
+  }
+  .logo {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, #6b4ee6, #9b6dff);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .hd-title { font-size: 13px; font-weight: 600; }
+  .hd-sub { font-size: 11px; color: var(--ink-soft); }
+  .hd-actions { margin-left: auto; display: flex; gap: 2px; }
+  .icon-btn {
+    width: 26px; height: 26px;
+    border: 0;
+    background: transparent;
+    color: var(--ink-soft);
+    border-radius: 5px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .icon-btn:hover { background: rgba(0,0,0,.06); color: var(--ink); }
+  .icon-btn.icon-btn-wide { width: auto; padding: 0 9px; gap: 6px; font-size: 12px; font-weight: 500; color: var(--ink); }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 10px 12px;
+    border-bottom: 0.5px solid var(--rule);
+  }
+  .stat {
+    padding: 8px 6px;
+    background: rgba(107,78,230,.06);
+    border-radius: 7px;
+    text-align: center;
+  }
+  .stat-n {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--accent);
+  }
+  .stat-l {
+    font-size: 9.5px;
+    color: var(--ink-soft);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+  }
+
+  .tabs {
+    display: flex;
+    padding: 4px 8px 0;
+    gap: 2px;
+    border-bottom: 0.5px solid var(--rule);
+  }
+  .tab {
+    flex: 1;
+    height: 32px;
+    border: 0;
+    background: transparent;
+    color: var(--ink-soft);
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 6px 6px 0 0;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: relative;
+  }
+  .tab.is-active { color: var(--accent); background: rgba(107,78,230,.08); }
+  .tab.is-active::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5px; left: 8px; right: 8px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 1px 1px 0 0;
+  }
+  .tab-count {
+    font-family: ui-monospace, monospace;
+    font-size: 9.5px;
+    padding: 1px 5px;
+    border-radius: 999px;
+    background: rgba(0,0,0,.07);
+  }
+  .tab.is-active .tab-count { background: rgba(107,78,230,.18); }
+
+  .body {
+    padding: 6px 0;
+    min-height: 80px;
+    max-height: 320px;
+    overflow-y: auto;
+  }
+  .empty {
+    padding: 22px 16px;
+    text-align: center;
+    color: var(--ink-soft);
+    font-size: 12px;
+    line-height: 1.5;
+  }
+  .item {
+    padding: 9px 14px;
+    cursor: pointer;
+    border-bottom: 0.5px solid var(--rule);
+    transition: background 0.12s;
+  }
+  .item:hover { background: rgba(0,0,0,.04); }
+  .item:last-child { border-bottom: 0; }
+  .item-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 5px;
+  }
+  .item-q {
+    flex: 1;
+    font-family: "Source Serif Pro", Charter, Georgia, serif;
+    font-style: italic;
+    font-size: 12px;
+    color: rgba(26,24,20,.78);
+    line-height: 1.4;
+  }
+  .item-bookmark { color: var(--accent); flex-shrink: 0; margin-top: 2px; }
+  .item-e {
+    font-size: 11.5px;
+    color: var(--ink-soft);
+    line-height: 1.4;
+    margin-bottom: 4px;
+  }
+  .item-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: ui-monospace, monospace;
+    font-size: 9.5px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ink-faint);
+  }
+  .item-meta .go { color: var(--accent); opacity: 0; transition: opacity 0.12s; }
+  .item:hover .item-meta .go { opacity: 1; }
+
+  .ft {
+    border-top: 0.5px solid var(--rule);
+    padding: 8px 10px;
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .ft button {
+    height: 26px;
+    padding: 0 10px;
+    border: 0;
+    background: transparent;
+    color: var(--ink-soft);
+    font: inherit;
+    font-size: 11.5px;
+    font-weight: 500;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+  }
+  .ft button:hover { background: rgba(0,0,0,.06); color: var(--ink); }
+  .ft .spacer { flex: 1; }
+  .ft .kbd-hint {
+    font-family: ui-monospace, monospace;
+    font-size: 10px;
+    color: var(--ink-faint);
+    padding: 0 6px;
+  }
+  .ft .kbd-hint kbd {
+    padding: 1px 4px;
+    border: 0.5px solid var(--rule);
+    border-radius: 3px;
+    background: #fff;
+  }
+
+  .appearance { padding: 14px 16px; display: flex; flex-direction: column; gap: 14px; }
+  .ap-row { display: flex; align-items: center; gap: 12px; }
+  .ap-row.ap-col { flex-direction: column; align-items: stretch; gap: 6px; }
+  .ap-lbl { font-size: 12px; font-weight: 500; color: var(--ink); flex: 1; }
+  .ap-lbl-row { display: flex; justify-content: space-between; align-items: baseline; }
+  .ap-val { font-size: 11px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .ap-tints { display: flex; gap: 8px; }
+  .ap-tint { width: 22px; height: 22px; border-radius: 50%; border: 2px solid transparent; background: var(--c); cursor: pointer; padding: 0; }
+  .ap-tint.is-active { border-color: var(--ink); box-shadow: inset 0 0 0 2px #fff; }
+  .ap-toggle { width: 36px; height: 20px; border-radius: 999px; background: rgba(0,0,0,.12); border: 0; padding: 0; cursor: pointer; position: relative; transition: background .15s; }
+  .ap-toggle i { position: absolute; left: 2px; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left .15s; box-shadow: 0 1px 2px rgba(0,0,0,.2); display: block; }
+  .ap-toggle[data-on="1"] { background: var(--accent); }
+  .ap-toggle[data-on="1"] i { left: 18px; }
+  .appearance input[type="range"] { -webkit-appearance: none; appearance: none; width: 100%; height: 4px; background: rgba(0,0,0,.1); border-radius: 2px; }
+  .appearance input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 14px; height: 14px; background: var(--accent); border-radius: 50%; cursor: pointer; border: 0; }
+  body.on-appearance .ft #clearBtn,
+  body.on-appearance .ft .kbd-hint { display: none; }
+  body.on-appearance .ft::before { content: "Changes apply to the in-page Lens popup."; font-size: 11px; color: var(--ink-soft); flex: 1; }
+</style>
+</head>
+<body>
+<div class="hd">
+  <div class="logo">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+      <circle cx="7" cy="7" r="4.5" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M10.5 10.5L14 14" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      <circle cx="7" cy="7" r="1.8" fill="currentColor"/>
+    </svg>
+  </div>
+  <div>
+    <div class="hd-title">Lens</div>
+    <div class="hd-sub">Highlight text → AI explanation</div>
+  </div>
+  <div class="hd-actions">
+    <button class="icon-btn icon-btn-wide" id="optionsBtn" title="Open Lens settings">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="1.8"/>
+      </svg>
+      <span>Settings</span>
+    </button>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-n" id="histN">0</div><div class="stat-l">history</div></div>
+  <div class="stat"><div class="stat-n" id="savedN">0</div><div class="stat-l">saved</div></div>
+  <div class="stat"><div class="stat-n">⌘E</div><div class="stat-l">shortcut</div></div>
+</div>
+
+<div class="tabs">
+  <button class="tab is-active" data-tab="history">
+    History <span class="tab-count" id="histCount">0</span>
+  </button>
+  <button class="tab" data-tab="saved">
+    Saved <span class="tab-count" id="savedCount">0</span>
+  </button>
+  <button class="tab" data-tab="appearance">Appearance</button>
+</div>
+
+<div class="body" id="body"></div>
+
+<div class="ft">
+  <button id="clearBtn">Clear</button>
+  <div class="spacer"></div>
+  <span class="kbd-hint">Shortcut: <kbd>⌘</kbd> + <kbd>E</kbd></span>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lens PDF</title>
+<link rel="stylesheet" href="./web/pdf_viewer.css">
+<link rel="stylesheet" href="../content.css">
+<style>
+  [hidden] { display: none !important; }   /* must beat #status display:flex */
+  html, body { margin: 0; padding: 0; height: 100%; background: #2a2a2e; }
+  #toolbar {
+    position: fixed; inset: 0 0 auto 0; height: 40px; z-index: 5;
+    display: flex; align-items: center; gap: 12px; padding: 0 14px;
+    background: #1f1f23; color: #e6e6ea;
+    font: 13px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  #toolbar .brand { font-weight: 600; }
+  #toolbar .brand span { opacity: .55; font-weight: 400; }
+  #toolbar .spacer { flex: 1; }
+  #toolbar button {
+    background: rgba(255,255,255,.08); color: #e6e6ea; border: 0;
+    padding: 5px 10px; border-radius: 6px; font-size: 12px; cursor: pointer;
+  }
+  #toolbar button:hover { background: rgba(255,255,255,.15); }
+  #viewerContainer { position: absolute; inset: 40px 0 0 0; overflow: auto; }
+  #viewer { padding: 18px 0 60px; display: flex; flex-direction: column;
+            align-items: center; gap: 14px; }
+  .page { position: relative; background: #fff;
+          box-shadow: 0 2px 14px rgba(0,0,0,.4); }
+  .page canvas { display: block; }
+  #status {
+    position: absolute; inset: 40px 0 0 0; display: flex;
+    align-items: center; justify-content: center; color: #c9c9d0;
+    font: 14px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    text-align: center; padding: 24px;
+  }
+  #status .box { max-width: 460px; }
+  #status a { color: #b8a8ff; }
+  #status input {
+    width: 100%; margin-top: 12px; padding: 8px 10px; border-radius: 6px;
+    border: 1px solid rgba(255,255,255,.15); background: #1f1f23; color: #e6e6ea;
+  }
+</style>
+</head>
+<body>
+  <div id="toolbar">
+    <div class="brand">Lens <span>&middot; PDF</span></div>
+    <div class="spacer"></div>
+    <button id="zoomOut" title="Zoom out">&minus;</button>
+    <button id="zoomIn" title="Zoom in">+</button>
+    <button id="fitWidth" title="Fit width">Fit</button>
+    <button id="openOriginal" title="Open the original PDF in Chrome">Original</button>
+  </div>
+
+  <div id="viewerContainer"><div id="viewer"></div></div>
+
+  <div id="status" hidden><div class="box" id="statusBox"></div></div>
+
+  <script type="module" src="./viewer.js"></script>
+  <script src="../content.js"></script>
+</body>
+</html>
