@@ -13,8 +13,8 @@ anything else with text.
    ⌘E / Ctrl+E, or right-click → "Explain with Lens."
 4. The popup explains it, using the surrounding paragraph as context.
 
-**No setup needed on supported devices.** Lens uses Chrome's built-in
-on-device AI by default — free, private, no account, no API key.
+**No setup needed, on any device.** Lens uses the free Lens explanation
+service by default — no account, no API key, no hardware requirements.
 
 ### Optional: Claude cloud mode
 
@@ -22,12 +22,13 @@ For higher-quality explanations, open **Settings** and paste an
 **Anthropic API key** (from https://console.anthropic.com). The
 "Explanation engine" setting controls which mode is used:
 
-- **Auto** (default) — built-in AI when available; Claude if a key is saved.
-- **Built-in AI only** — on-device, free.
+- **Auto** (default) — the Lens service, works everywhere; Claude if a
+  key is saved. Falls back to Chrome's built-in on-device AI if the
+  service is unreachable.
+- **Lens service only** — free hosted model, no key.
+- **Built-in AI only** — on-device and private, but needs Chrome 138+
+  and supported hardware.
 - **Claude API** — highest quality, uses your key.
-
-If your Chrome or device doesn't support built-in AI, cloud mode with a
-key is required.
 
 ### Tabs in the popup
 

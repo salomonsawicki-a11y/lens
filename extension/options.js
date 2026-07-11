@@ -4,6 +4,7 @@
 const els = {
   apiKey: document.getElementById('apiKey'),
   engine: document.getElementById('engine'),
+  serverUrl: document.getElementById('serverUrl'),
   engineStatus: document.getElementById('engineStatus'),
   downloadBtn: document.getElementById('downloadBtn'),
   showBtn: document.getElementById('showBtn'),
@@ -38,11 +39,11 @@ const DEFAULTS = {
 
 function load() {
   chrome.storage.local.get(
-    ['apiKey', 'engine', 'model', 'tint', 'dark', 'popupWidth', 'fontSize', 'streamSpeed', 'history', 'saved'],
+    ['apiKey', 'engine', 'model', 'serverUrl', 'tint', 'dark', 'popupWidth', 'fontSize', 'streamSpeed', 'history', 'saved'],
     (s) => {
       els.apiKey.value = s.apiKey || '';
-      // 'lens' (proxy service) is retired; fold it into auto.
-      els.engine.value = s.engine === 'lens' ? 'auto' : (s.engine || DEFAULTS.engine);
+      els.serverUrl.value = s.serverUrl || '';
+      els.engine.value = s.engine || DEFAULTS.engine;
       els.model.value = s.model || DEFAULTS.model;
       els.tint.value = s.tint || DEFAULTS.tint;
       els.dark.dataset.on = s.dark ? '1' : '0';
@@ -79,7 +80,8 @@ els.saveBtn.addEventListener('click', () => {
     apiKey: els.apiKey.value.trim(),
     model: els.model.value,
     engine: els.engine.value,
-  }, () => setStatus('Saved.', 'ok'));
+    serverUrl: els.serverUrl.value.trim(),
+  }, () => { setStatus('Saved.', 'ok'); refreshEngineStatus(); });
 });
 
 // ── Built-in AI status ──
@@ -88,11 +90,17 @@ els.saveBtn.addEventListener('click', () => {
 // gesture some builds require to start the model download). When the API
 // isn't exposed here, fall back to asking the background worker, which
 // proxies through its offscreen host.
+const SERVICE_LABEL = {
+  ok: '✓ Lens service is reachable — explanations work on this device with no setup.',
+  unconfigured: 'No Lens service is configured in this build.',
+  unreachable: 'Can\'t reach the Lens service right now (offline? wrong Service URL?).',
+  error: 'The Lens service responded with an error.',
+};
 const AVAIL_LABEL = {
-  available: '✓ Built-in AI is ready on this device — Lens works with no API key.',
-  downloadable: 'Built-in AI is supported here, but the model needs a one-time download.',
-  downloading: 'Downloading the built-in AI model (one-time)…',
-  unavailable: 'Built-in AI is not supported on this Chrome/device. Add an API key below to use cloud mode.',
+  available: 'Built-in AI: ready (used automatically if the service is down).',
+  downloadable: 'Built-in AI: supported, needs a one-time model download.',
+  downloading: 'Built-in AI: downloading the model (one-time)…',
+  unavailable: 'Built-in AI: not supported on this Chrome/device.',
 };
 
 function pageLM() {
@@ -134,11 +142,21 @@ function workerEngineStatus() {
 
 let statusTimer = null;
 let localPct = 0; // progress from an in-page download, if one is running
+let lastService = null; // cached so in-page download progress keeps context
 
-function showEngineStatus(builtin, pct) {
-  let txt = AVAIL_LABEL[builtin] || AVAIL_LABEL.unavailable;
-  if (builtin === 'downloading' && pct) txt += ' ' + pct + '%';
-  els.engineStatus.textContent = txt;
+function showEngineStatus(service, builtin, pct) {
+  const lines = [];
+  if (service) {
+    let s = SERVICE_LABEL[service.state] || SERVICE_LABEL.error;
+    if (service.state === 'ok' && service.engine) {
+      s += service.engine === 'claude' ? ' (answers by Claude)' : ' (free hosted model)';
+    }
+    lines.push(s);
+  }
+  let b = AVAIL_LABEL[builtin] || AVAIL_LABEL.unavailable;
+  if (builtin === 'downloading' && pct) b += ' ' + pct + '%';
+  lines.push(b);
+  els.engineStatus.textContent = lines.join(' ');
   els.downloadBtn.style.display = (builtin === 'downloadable') ? '' : 'none';
   // Keep polling while a download could be in flight.
   clearTimeout(statusTimer);
@@ -148,15 +166,17 @@ function showEngineStatus(builtin, pct) {
 }
 
 async function refreshEngineStatus() {
-  let builtin = await pageAvailability();
-  let pct = localPct;
-  if (builtin === null) {
-    const st = await workerEngineStatus();
-    if (!st) return;
-    builtin = st.builtin;
-    pct = (st.download && st.download.pct) || 0;
-  }
-  showEngineStatus(builtin, pct);
+  const st = await workerEngineStatus();
+  let builtin = st ? st.builtin : null;
+  let pct = st ? ((st.download && st.download.pct) || 0) : 0;
+  if (st && st.service) lastService = st.service;
+  // The options page's own view of the Prompt API wins when available —
+  // it's the most direct signal, and tracks in-page downloads live.
+  const pageAvail = await pageAvailability();
+  if (pageAvail !== null && (builtin === null || builtin === 'unavailable')) builtin = pageAvail;
+  if (localPct) pct = localPct;
+  if (builtin === null && !lastService) return;
+  showEngineStatus(lastService, builtin, pct);
 }
 
 els.engine.addEventListener('change', () => {
@@ -177,7 +197,7 @@ els.downloadBtn.addEventListener('click', async () => {
           try {
             m.addEventListener('downloadprogress', (e) => {
               localPct = downloadPct(e);
-              showEngineStatus('downloading', localPct);
+              showEngineStatus(lastService, 'downloading', localPct);
             });
           } catch (err) {}
         },

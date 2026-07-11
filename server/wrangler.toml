@@ -1,0 +1,21 @@
+name = "lens-api"
+main = "worker.js"
+compatibility_date = "2026-01-01"
+
+# Cloudflare Workers AI — free tier included with every Cloudflare account.
+[ai]
+binding = "AI"
+
+[vars]
+# Workers AI model used when no ANTHROPIC_API_KEY secret is set.
+# Swap to "@cf/meta/llama-3.1-8b-instruct-fast" to stretch the free quota
+# further (smaller model, more requests per day).
+MODEL = "@cf/meta/llama-3.3-70b-instruct-fp8-fast"
+
+# Claude model used when the ANTHROPIC_API_KEY secret IS set.
+CLAUDE_MODEL = "claude-haiku-4-5-20251001"
+
+# Comma-separated Origin allowlist. Leave empty while testing; once the
+# extension is published, set it to your extension's origin, e.g.:
+# ALLOWED_ORIGINS = "chrome-extension://<your-extension-id>"
+ALLOWED_ORIGINS = ""

@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.3.0 — Works on any device: the Lens explanation service
+
+- New default engine: the Lens explanation service, a tiny Cloudflare
+  Worker (see `server/`) that answers with a free hosted model — so Lens
+  works with zero setup regardless of the user's hardware. The operator
+  can upgrade the service to Claude by adding an Anthropic key
+  server-side.
+- Auto mode order: your API key (if saved) → Lens service → built-in
+  on-device AI as an automatic offline/fallback engine.
+- New "Lens service only" engine choice, plus an advanced Service URL
+  override in Settings.
+- Settings now shows both the service's reachability and built-in AI
+  status on one line.
+- Requests to the service carry a random per-install UUID for rate
+  limiting only; the service stores no prompts. PRIVACY.md updated to
+  describe the new default data flow.
+
 ## 2.2.0 — Built-in AI actually works everywhere it can
 
 - Fixed built-in AI never activating on Chrome versions where the Prompt

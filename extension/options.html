@@ -250,12 +250,18 @@
     <label>
       <span>Engine</span>
       <select id="engine">
-        <option value="auto">Auto — built-in AI, no setup needed (recommended)</option>
-        <option value="builtin">Built-in AI only — on-device, free, no key needed</option>
+        <option value="auto">Auto — Lens service, works on any device, no setup (recommended)</option>
+        <option value="lens">Lens service only — free cloud, no key needed</option>
+        <option value="builtin">Built-in AI only — on-device, private, needs supported hardware</option>
         <option value="cloud">Claude API — highest quality, needs your Anthropic key</option>
       </select>
       <div class="hint" id="engineStatus" style="margin-top:6px;font-size:12px;color:#777"></div>
       <button class="btn secondary" id="downloadBtn" style="display:none;margin-top:6px">Download built-in model</button>
+    </label>
+
+    <label>
+      <span class="lbl">Service URL <span style="font-weight:400;color:#999">(advanced — leave empty for the default Lens service)</span></span>
+      <input type="text" id="serverUrl" placeholder="https://lens-api.example.workers.dev" autocomplete="off" spellcheck="false" />
     </label>
 
     <label>

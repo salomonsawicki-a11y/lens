@@ -1,8 +1,14 @@
 // Lens background service worker.
-// Routes explanation requests to an AI engine — Chrome's built-in on-device
-// model (Prompt API) by default, with the user's optional Anthropic API key as
-// a cloud upgrade — relays the ⌘E command to the active tab's content script,
-// and exposes message endpoints for explain / define / related / followup.
+// Routes explanation requests to an AI engine — the Lens cloud service by
+// default (works on any hardware, no key), Chrome's built-in on-device model
+// as a private/offline fallback, and the user's optional Anthropic API key as
+// a quality upgrade — relays the ⌘E command to the active tab's content
+// script, and exposes message endpoints for explain / define / related /
+// followup.
+
+// The Lens explanation service (see server/README.md for the 3-minute
+// deploy). Users can override it in Settings → Service URL.
+const LENS_SERVER = 'https://lens-api.REPLACE-ME.workers.dev';
 
 const DEFAULT_MODEL = 'claude-haiku-4-5-20251001';
 const RETIRED_MODELS = new Set(['claude-3-5-haiku-latest','claude-3-5-haiku-20241022','claude-3-5-sonnet-latest','claude-3-5-sonnet-20241022','claude-3-5-sonnet-20240620','claude-3-7-sonnet-latest','claude-3-7-sonnet-20250219','claude-3-haiku-20240307','claude-3-opus-latest','claude-3-opus-20240229','claude-3-sonnet-20240229']);
@@ -10,14 +16,75 @@ function cleanProse(s){if(typeof s!=='string')return s;s=s.replace(/^[ \t]*#{1,6
 
 function getSettings() {
   return new Promise((res) => {
-    chrome.storage.local.get(['apiKey', 'model', 'engine'], (s) => {
+    chrome.storage.local.get(['apiKey', 'model', 'engine', 'serverUrl'], (s) => {
       let model = s.model || DEFAULT_MODEL;
       if (RETIRED_MODELS.has(model)) { model = DEFAULT_MODEL; chrome.storage.local.set({ model }); }
-      let engine = s.engine || 'auto';
-      if (engine === 'lens') { engine = 'auto'; chrome.storage.local.set({ engine }); } // retired engine
-      res({ apiKey: (s.apiKey || '').trim(), model, engine });
+      const engine = s.engine || 'auto';
+      const serverUrl = ((s.serverUrl || '').trim() || LENS_SERVER).replace(/\/+$/, '');
+      res({ apiKey: (s.apiKey || '').trim(), model, engine, serverUrl });
     });
   });
+}
+
+// ── Lens cloud service ──────────────────────────────────────────────────────
+// A Cloudflare Worker (server/worker.js) that answers with a hosted model —
+// works on any device, no user setup. Free Workers AI by default; Claude if
+// the operator set an Anthropic key server-side.
+
+function serverConfigured(url) {
+  return !!url && !url.includes('REPLACE-ME');
+}
+
+// Random per-install ID sent with service requests so the operator can
+// rate-limit abusive clients. Not tied to any account or page data.
+function getUid() {
+  return new Promise((res) => {
+    chrome.storage.local.get(['uid'], (s) => {
+      if (s.uid) return res(s.uid);
+      const uid = crypto.randomUUID();
+      chrome.storage.local.set({ uid });
+      res(uid);
+    });
+  });
+}
+
+async function callLensServer(prompt) {
+  const { serverUrl } = await getSettings();
+  if (!serverConfigured(serverUrl)) throw new Error('__server_unconfigured__');
+  let r;
+  try {
+    r = await fetch(serverUrl + '/explain', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt, uid: await getUid() }),
+    });
+  } catch (e) {
+    throw new Error('__server_unreachable__');
+  }
+  if (!r.ok) {
+    let detail = '';
+    try { const j = await r.json(); detail = j.error || JSON.stringify(j); }
+    catch (e) { detail = await r.text().catch(() => ''); }
+    throw new Error(`Lens service error (${r.status}): ${String(detail).slice(0, 200)}`);
+  }
+  const j = await r.json().catch(() => null);
+  if (!j || typeof j.text !== 'string' || !j.text.trim()) {
+    throw new Error('Lens service returned an empty response.');
+  }
+  return j.text;
+}
+
+async function serviceStatus() {
+  const { serverUrl } = await getSettings();
+  if (!serverConfigured(serverUrl)) return { state: 'unconfigured' };
+  try {
+    const r = await fetch(serverUrl + '/health');
+    if (!r.ok) return { state: 'error' };
+    const j = await r.json().catch(() => ({}));
+    return { state: 'ok', engine: j.engine || 'unknown' };
+  } catch (e) {
+    return { state: 'unreachable' };
+  }
 }
 
 // ── Built-in AI (Chrome's on-device model, via the Prompt API) ─────────────
@@ -188,22 +255,44 @@ async function builtinWarmup() {
 }
 
 // ── Engine router ───────────────────────────────────────────────────────────
-// Default ('auto'): built-in AI — free, on-device, zero setup. Saving an
-// Anthropic API key is an explicit upgrade: auto then uses Claude instead.
+// Default ('auto'): the Lens cloud service — works on any hardware, zero
+// setup. Saving an Anthropic API key is an explicit upgrade: auto then calls
+// Claude directly instead. Built-in on-device AI is the fallback when the
+// service can't answer (and a first-class engine users can pick themselves).
 async function callModel(prompt) {
   const { apiKey, engine } = await getSettings();
   if (engine === 'cloud') return callClaude(prompt);
   if (engine === 'builtin') return callBuiltinOnly(prompt);
+  if (engine === 'lens') return callLensOnly(prompt);
 
   // 'auto'
   if (apiKey) return callClaude(prompt);
+  let serviceErr = null;
+  try { return await callLensServer(prompt); }
+  catch (e) { serviceErr = e; }
+
+  // Service didn't answer — fall back to on-device AI if this machine has it.
   const avail = await builtinAvailability();
   if (avail === 'available') return callBuiltin(prompt);
-  if (avail === 'downloadable' || avail === 'downloading') {
-    builtinStartDownload();
-    throw new Error(await downloadingMessage());
+  if (avail === 'downloadable' || avail === 'downloading') builtinStartDownload();
+
+  const m = serviceErr.message || '';
+  const reason = m === '__server_unconfigured__'
+    ? 'This Lens build has no explanation service configured'
+    : m === '__server_unreachable__'
+      ? "Couldn't reach the Lens explanation service (are you offline?)"
+      : m;
+  throw new Error(reason + ". Built-in on-device AI isn't ready on this machine either. You can add an Anthropic API key in Lens Settings (toolbar icon → Settings) to explain with Claude directly.");
+}
+
+async function callLensOnly(prompt) {
+  try { return await callLensServer(prompt); }
+  catch (e) {
+    const m = e.message || '';
+    if (m === '__server_unconfigured__') throw new Error('This Lens build has no explanation service configured. Set the Service URL in Lens Settings (see server/README.md for deploying one).');
+    if (m === '__server_unreachable__') throw new Error("Couldn't reach the Lens explanation service. Check your connection, or check the Service URL in Lens Settings.");
+    throw e;
   }
-  throw new Error("This Chrome/device doesn't support built-in AI yet. Update Chrome to the latest version and try again — or add an Anthropic API key in Lens Settings (toolbar icon → Settings) to use cloud mode.");
 }
 
 async function callBuiltinOnly(prompt) {
@@ -320,9 +409,12 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
         sendResponse({ result: true });
       } else if (msg.action === 'engine-status') {
         const { apiKey, engine } = await getSettings();
-        const avail = await builtinAvailability();
-        const download = await builtinDownloadStatus();
-        sendResponse({ result: { engine, builtin: avail, download, hasKey: !!apiKey } });
+        const [avail, download, service] = await Promise.all([
+          builtinAvailability(),
+          builtinDownloadStatus(),
+          serviceStatus(),
+        ]);
+        sendResponse({ result: { engine, builtin: avail, download, service, hasKey: !!apiKey } });
       } else if (msg.action === 'builtin-download') {
         builtinStartDownload();
         sendResponse({ result: true });
