@@ -8,7 +8,7 @@
 
 // The Lens explanation service (see server/README.md for the 3-minute
 // deploy). Users can override it in Settings → Service URL.
-const LENS_SERVER = 'https://lens-api.REPLACE-ME.workers.dev';
+const LENS_SERVER = 'https://lens-api.salomon-sawicki.workers.dev';
 
 const DEFAULT_MODEL = 'claude-haiku-4-5-20251001';
 const RETIRED_MODELS = new Set(['claude-3-5-haiku-latest','claude-3-5-haiku-20241022','claude-3-5-sonnet-latest','claude-3-5-sonnet-20241022','claude-3-5-sonnet-20240620','claude-3-7-sonnet-latest','claude-3-7-sonnet-20250219','claude-3-haiku-20240307','claude-3-opus-latest','claude-3-opus-20240229','claude-3-sonnet-20240229']);
