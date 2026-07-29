@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Lens — AI Reading Companion",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Highlight any sentence and get an instant AI explanation — no account or API key needed on supported devices.",
   "author": "Salomon Noah Sawicki",
   "homepage_url": "https://salomonsawicki-a11y.github.io/lens/",

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.3.1 — Service URL baked in
+
+- The Lens explanation service is now live at
+  `lens-api.salomon-sawicki.workers.dev` and is the extension's built-in
+  default, so a fresh install explains highlighted text with no Service
+  URL, no API key, and no hardware requirements.
+
 ## 2.3.0 — Works on any device: the Lens explanation service
 
 - New default engine: the Lens explanation service, a tiny Cloudflare
